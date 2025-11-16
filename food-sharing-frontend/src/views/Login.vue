@@ -19,6 +19,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginApi } from '@/api/auth'
+import { getUserInfo } from '@/api/users'
 const form = reactive({ username: '', password: '' })
 const loading = ref(false)
 const router = useRouter()
@@ -30,6 +31,13 @@ async function onSubmit() {
     const { data } = await loginApi({ usernameOrEmail: form.username, password: form.password })
     if (data?.token) {
       localStorage.setItem('token', data.token)
+      // 获取用户信息并保存
+      try {
+        const userResponse = await getUserInfo()
+        localStorage.setItem('userInfo', JSON.stringify(userResponse.data))
+      } catch (error) {
+        console.error('获取用户信息失败:', error)
+      }
       router.push('/')
     }
   } finally {

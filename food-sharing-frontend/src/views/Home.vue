@@ -8,9 +8,25 @@
     <!-- 内容列表 -->
     <div class="content-section">
       <div class="section-header">
-        <h2>最新美食分享</h2>
+        <h2>美食分享</h2>
         <el-button type="primary" @click="goToCreate">发布内容</el-button>
       </div>
+      
+      <!-- 推荐标签页 -->
+      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+        <el-tab-pane label="推荐" name="recommended">
+          <div class="tab-content">为您推荐</div>
+        </el-tab-pane>
+        <el-tab-pane label="最新" name="latest">
+          <div class="tab-content">最新内容</div>
+        </el-tab-pane>
+        <el-tab-pane label="热门" name="hot">
+          <div class="tab-content">热门内容</div>
+        </el-tab-pane>
+        <el-tab-pane label="全部" name="all">
+          <div class="tab-content">全部内容</div>
+        </el-tab-pane>
+      </el-tabs>
       
       <div v-loading="loading" class="post-list">
         <div v-if="posts.length === 0 && !loading" class="empty-state">
@@ -26,7 +42,12 @@
             @click="goToDetail(post.id)"
           >
             <div class="post-image" v-if="post.imageUrl">
-              <img :src="post.imageUrl" :alt="post.title" />
+              <img 
+                :src="post.imageUrl" 
+                :alt="post.title"
+                loading="lazy"
+                @error="handleImageError"
+              />
             </div>
             
             <div class="post-content">
@@ -95,6 +116,7 @@ import Heart from '@/components/icons/Heart.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Pagination from '@/components/Pagination.vue'
 import { getPosts } from '@/api/posts.js'
+import { getPersonalizedRecommendations, getLatestPosts, getHotPosts } from '@/api/recommendations.js'
 
 const router = useRouter()
 
@@ -104,6 +126,7 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const searchParams = ref({})
+const activeTab = ref('recommended')
 
 const loadPosts = async () => {
   loading.value = true
@@ -125,10 +148,72 @@ const loadPosts = async () => {
   }
 }
 
+const loadRecommendedPosts = async () => {
+  loading.value = true
+  try {
+    const response = await getPersonalizedRecommendations(20)
+    posts.value = response.data.items
+    total.value = response.data.count
+  } catch (error) {
+    console.error('加载推荐内容失败:', error)
+    ElMessage.error('加载推荐内容失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadLatestPosts = async () => {
+  loading.value = true
+  try {
+    const response = await getLatestPosts(20)
+    posts.value = response.data.items
+    total.value = response.data.count
+  } catch (error) {
+    console.error('加载最新内容失败:', error)
+    ElMessage.error('加载最新内容失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadHotPosts = async () => {
+  loading.value = true
+  try {
+    const response = await getHotPosts(20)
+    posts.value = response.data.items
+    total.value = response.data.count
+  } catch (error) {
+    console.error('加载热门内容失败:', error)
+    ElMessage.error('加载热门内容失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleTabChange = (tabName) => {
+  currentPage.value = 1
+  searchParams.value = {}
+  
+  if (tabName === 'recommended') {
+    loadRecommendedPosts()
+  } else if (tabName === 'latest') {
+    loadLatestPosts()
+  } else if (tabName === 'hot') {
+    loadHotPosts()
+  } else {
+    loadPosts()
+  }
+}
+
 const handleSearch = (params) => {
   searchParams.value = params
   currentPage.value = 1
   loadPosts()
+}
+
+const handleImageError = (event) => {
+  // 图片加载失败时的处理
+  event.target.style.display = 'none'
 }
 
 const handlePagination = ({ page, limit }) => {
@@ -166,7 +251,7 @@ const formatTime = (time) => {
 }
 
 onMounted(() => {
-  loadPosts()
+  loadRecommendedPosts()
 })
 </script>
 
@@ -257,6 +342,10 @@ onMounted(() => {
 .empty-state {
   text-align: center;
   padding: 60px 0;
+}
+
+.tab-content {
+  margin-top: 20px;
 }
 
 .post-interactions {

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
@@ -19,6 +20,8 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     Page<Follow> findByFollowerOrderByCreatedAtDesc(User follower, Pageable pageable);
     
     Page<Follow> findByFollowingOrderByCreatedAtDesc(User following, Pageable pageable);
+    
+    List<Follow> findByFollower(User follower);
     
     @Query("SELECT COUNT(f) FROM Follow f WHERE f.following = :user")
     long countFollowers(User user);

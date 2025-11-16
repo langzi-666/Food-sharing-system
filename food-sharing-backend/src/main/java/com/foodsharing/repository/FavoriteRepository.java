@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
@@ -18,6 +19,8 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     void deleteByUserAndPost(User user, Post post);
     
     Page<Favorite> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
+    
+    List<Favorite> findByUser(User user);
     
     @Query("SELECT COUNT(f) FROM Favorite f WHERE f.post = :post")
     long countByPost(Post post);

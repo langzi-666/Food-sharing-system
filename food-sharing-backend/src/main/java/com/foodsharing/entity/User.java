@@ -37,6 +37,9 @@ public class User {
     @Column(name = "level", nullable = false)
     private Integer level = 1;
 
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled = true;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -63,4 +66,7 @@ public class User {
 
     public Integer getLevel() { return level; }
     public void setLevel(Integer level) { this.level = level; }
+
+    public Boolean getEnabled() { return enabled; }
+    public void setEnabled(Boolean enabled) { this.enabled = enabled; }
 }

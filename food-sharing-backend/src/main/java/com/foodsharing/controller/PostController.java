@@ -94,10 +94,25 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> detail(@PathVariable Long id) {
+    public ResponseEntity<?> detail(@PathVariable Long id, Authentication authentication) {
         Optional<Post> opt = postRepository.findById(id);
         if (opt.isEmpty()) return ResponseEntity.status(404).body(Map.of("message", "内容不存在"));
         Post p = opt.get();
+        
+        // 普通用户只能查看已审核通过的内容
+        boolean isAdmin = false;
+        if (authentication != null) {
+            String username = authentication.getName();
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user != null && "ROLE_ADMIN".equals(user.getRole())) {
+                isAdmin = true;
+            }
+        }
+        
+        if (!isAdmin && !"APPROVED".equals(p.getStatus())) {
+            return ResponseEntity.status(404).body(Map.of("message", "内容不存在"));
+        }
+        
         p.setViewCount(p.getViewCount() + 1);
         postRepository.save(p);
         return ResponseEntity.ok(toDetailMap(p));
@@ -108,11 +123,18 @@ public class PostController {
                                   @RequestParam(defaultValue = "10") int size,
                                   @RequestParam(required = false) String q,
                                   @RequestParam(required = false) Long categoryId,
-                                  @RequestParam(required = false) Long tagId) {
+                                  @RequestParam(required = false) Long tagId,
+                                  @RequestParam(required = false) Long authorId,
+                                  @RequestParam(required = false) String sortBy) {
         if (page < 0) page = 0;
         if (size <= 0 || size > 100) size = 10;
+        
         Specification<Post> spec = (root, query, cb) -> {
             List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            
+            // 普通用户只能看到已审核通过的内容
+            predicates.add(cb.equal(root.get("status"), "APPROVED"));
+            
             if (q != null && !q.isBlank()) {
                 var like = "%" + q.trim() + "%";
                 predicates.add(cb.or(
@@ -128,9 +150,25 @@ public class PostController {
                 predicates.add(cb.equal(join.get("id"), tagId));
                 query.distinct(true);
             }
+            if (authorId != null) {
+                predicates.add(cb.equal(root.get("author").get("id"), authorId));
+            }
             return cb.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
         };
-        Page<Post> result = postRepository.findAll(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+        
+        // 排序逻辑
+        Sort sort;
+        if ("hot".equals(sortBy)) {
+            // 热门排序：综合浏览量、点赞数、评论数
+            sort = Sort.by(Sort.Direction.DESC, "viewCount", "createdAt");
+        } else if ("popular".equals(sortBy)) {
+            sort = Sort.by(Sort.Direction.DESC, "viewCount");
+        } else {
+            // 默认按时间排序
+            sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+        
+        Page<Post> result = postRepository.findAll(spec, PageRequest.of(page, size, sort));
         Map<String, Object> resp = new HashMap<>();
         resp.put("page", result.getNumber());
         resp.put("size", result.getSize());

@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,14 +20,12 @@ import java.util.Map;
 public class AuthController {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
+    public AuthController(UserRepository userRepository,
                           AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
@@ -44,7 +41,7 @@ public class AuthController {
         User u = new User();
         u.setUsername(req.getUsername());
         u.setEmail(req.getEmail());
-        u.setPassword(passwordEncoder.encode(req.getPassword()));
+        u.setPassword(req.getPassword()); // 直接保存明文密码，不加密
         userRepository.save(u);
         return ResponseEntity.ok(Map.of("message", "注册成功"));
     }

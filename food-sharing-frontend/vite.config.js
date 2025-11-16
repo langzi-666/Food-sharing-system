@@ -16,5 +16,26 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['@element-plus/icons-vue']
+  },
+  build: {
+    // 打包优化配置
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'element-plus': ['element-plus'],
+          'vue-vendor': ['vue', 'vue-router'],
+          'axios': ['axios']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+    // 启用压缩
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // 生产环境移除console
+        drop_debugger: true
+      }
+    }
   }
 })
