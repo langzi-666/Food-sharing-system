@@ -53,8 +53,9 @@ const handleChange = async (value) => {
       // 新标签，需要创建
       try {
         const response = await createTag({ name: item })
-        newTags.push(response.data.id)
-        allTags.value.push(response.data)
+        // axios拦截器已经返回了response.data，所以直接使用response
+        newTags.push(response?.id)
+        allTags.value.push(response)
       } catch (error) {
         console.error('创建标签失败:', error)
       }

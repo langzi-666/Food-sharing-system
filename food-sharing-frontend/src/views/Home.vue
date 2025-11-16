@@ -138,11 +138,14 @@ const loadPosts = async () => {
     }
     
     const response = await getPosts(params)
-    posts.value = response.data.items
-    total.value = response.data.totalElements
+    // axios拦截器已经返回了response.data，所以直接使用response
+    posts.value = response?.items || []
+    total.value = response?.totalElements || 0
   } catch (error) {
     console.error('加载内容失败:', error)
     ElMessage.error('加载内容失败')
+    posts.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
@@ -152,11 +155,14 @@ const loadRecommendedPosts = async () => {
   loading.value = true
   try {
     const response = await getPersonalizedRecommendations(20)
-    posts.value = response.data.items
-    total.value = response.data.count
+    // axios拦截器已经返回了response.data，所以直接使用response
+    posts.value = response?.items || []
+    total.value = response?.count || 0
   } catch (error) {
     console.error('加载推荐内容失败:', error)
     ElMessage.error('加载推荐内容失败')
+    posts.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
@@ -166,11 +172,14 @@ const loadLatestPosts = async () => {
   loading.value = true
   try {
     const response = await getLatestPosts(20)
-    posts.value = response.data.items
-    total.value = response.data.count
+    // axios拦截器已经返回了response.data，所以直接使用response
+    posts.value = response?.items || []
+    total.value = response?.count || 0
   } catch (error) {
     console.error('加载最新内容失败:', error)
     ElMessage.error('加载最新内容失败')
+    posts.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
@@ -180,11 +189,14 @@ const loadHotPosts = async () => {
   loading.value = true
   try {
     const response = await getHotPosts(20)
-    posts.value = response.data.items
-    total.value = response.data.count
+    // axios拦截器已经返回了response.data，所以直接使用response
+    posts.value = response?.items || []
+    total.value = response?.count || 0
   } catch (error) {
     console.error('加载热门内容失败:', error)
     ElMessage.error('加载热门内容失败')
+    posts.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
@@ -212,8 +224,9 @@ const handleSearch = (params) => {
 }
 
 const handleImageError = (event) => {
-  // 图片加载失败时的处理
-  event.target.style.display = 'none'
+  // 图片加载失败时的处理：显示占位图或隐藏
+  event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7lm77niYfliqDovb3lpLHotKU8L3RleHQ+PC9zdmc+'
+  event.target.style.objectFit = 'cover'
 }
 
 const handlePagination = ({ page, limit }) => {
@@ -283,6 +296,47 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .home {
+    padding: 10px;
+  }
+  
+  .post-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .section-header h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .post-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .post-image {
+    height: 150px;
+  }
+  
+  .post-title {
+    font-size: 16px;
+  }
+  
+  .post-meta {
+    font-size: 12px;
+  }
 }
 
 .post-card {

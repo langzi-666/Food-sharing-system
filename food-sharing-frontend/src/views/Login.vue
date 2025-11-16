@@ -18,6 +18,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { loginApi } from '@/api/auth'
 import { getUserInfo } from '@/api/users'
 const form = reactive({ username: '', password: '' })
@@ -25,21 +26,30 @@ const loading = ref(false)
 const router = useRouter()
 
 async function onSubmit() {
-  if (!form.username || !form.password) return
+  if (!form.username || !form.password) {
+    ElMessage.warning('请输入用户名和密码')
+    return
+  }
   loading.value = true
   try {
-    const { data } = await loginApi({ usernameOrEmail: form.username, password: form.password })
+    const data = await loginApi({ usernameOrEmail: form.username, password: form.password })
     if (data?.token) {
       localStorage.setItem('token', data.token)
       // 获取用户信息并保存
       try {
         const userResponse = await getUserInfo()
-        localStorage.setItem('userInfo', JSON.stringify(userResponse.data))
+        localStorage.setItem('userInfo', JSON.stringify(userResponse))
+        ElMessage.success('登录成功')
+        router.push('/')
       } catch (error) {
         console.error('获取用户信息失败:', error)
+        // 即使获取用户信息失败，也允许登录
+        router.push('/')
       }
-      router.push('/')
     }
+  } catch (error) {
+    // 错误已在拦截器中处理，这里不需要再次显示
+    console.error('登录失败:', error)
   } finally {
     loading.value = false
   }

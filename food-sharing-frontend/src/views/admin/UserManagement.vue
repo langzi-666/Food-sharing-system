@@ -109,8 +109,9 @@ const loadUsers = async () => {
       params.keyword = searchKeyword.value
     }
     const response = await getUsers(params)
-    users.value = response.data.items
-    total.value = response.data.totalElements
+    // axios拦截器已经返回了response.data，所以直接使用response
+    users.value = response?.items || []
+    total.value = response?.totalElements || 0
   } catch (error) {
     console.error('加载用户列表失败:', error)
     ElMessage.error('加载用户列表失败')

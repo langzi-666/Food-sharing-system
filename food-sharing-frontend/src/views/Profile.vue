@@ -219,14 +219,15 @@ const loadUserInfo = async () => {
   console.log('开始加载用户信息...')
   try {
     const response = await getUserInfo()
-    console.log('用户信息加载成功:', response.data)
-    userInfo.value = response.data
+    // axios拦截器已经返回了response.data，所以直接使用response
+    console.log('用户信息加载成功:', response)
+    userInfo.value = response
     
     // 填充表单
     Object.assign(form, {
-      username: response.data.username,
-      email: response.data.email,
-      avatarUrl: response.data.avatarUrl
+      username: response?.username || '',
+      email: response?.email || '',
+      avatarUrl: response?.avatarUrl || ''
     })
   } catch (error) {
     console.error('加载用户信息失败:', error)
@@ -285,7 +286,8 @@ const handleAvatarChange = async (file) => {
   
   try {
     const response = await uploadAvatar(file.raw)
-    const avatarUrl = response.data.url
+    // axios拦截器已经返回了response.data，所以直接使用response
+    const avatarUrl = response?.url
     
     // 更新头像
     userInfo.value.avatarUrl = avatarUrl

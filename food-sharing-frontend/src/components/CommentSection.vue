@@ -181,8 +181,9 @@ const loadComments = async () => {
     }
     
     const response = await getComments(props.postId, params)
-    comments.value = response.data.items
-    totalComments.value = response.data.totalElements
+    // axios拦截器已经返回了response.data，所以直接使用response
+    comments.value = response?.items || []
+    totalComments.value = response?.totalElements || 0
   } catch (error) {
     console.error('加载评论失败:', error)
     ElMessage.error('加载评论失败')

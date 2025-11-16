@@ -88,8 +88,9 @@ const loadLogs = async () => {
       params.level = filterLevel.value
     }
     const response = await getLogs(params)
-    logs.value = response.data.items
-    total.value = response.data.totalElements
+    // axios拦截器已经返回了response.data，所以直接使用response
+    logs.value = response?.items || []
+    total.value = response?.totalElements || 0
   } catch (error) {
     console.error('加载日志失败:', error)
     ElMessage.error('加载日志失败')

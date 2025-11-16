@@ -86,8 +86,9 @@ const loadPosts = async () => {
       size: pageSize.value
     }
     const response = await getPendingPosts(params)
-    posts.value = response.data.items
-    total.value = response.data.totalElements
+    // axios拦截器已经返回了response.data，所以直接使用response
+    posts.value = response?.items || []
+    total.value = response?.totalElements || 0
   } catch (error) {
     console.error('加载待审核内容失败:', error)
     ElMessage.error('加载待审核内容失败')

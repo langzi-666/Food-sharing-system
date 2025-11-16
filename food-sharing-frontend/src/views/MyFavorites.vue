@@ -69,8 +69,9 @@ const loadFavorites = async () => {
     }
     
     const response = await getMyFavorites(params)
-    favorites.value = response.data.items
-    total.value = response.data.totalElements
+    // axios拦截器已经返回了response.data，所以直接使用response
+    favorites.value = response?.items || []
+    total.value = response?.totalElements || 0
   } catch (error) {
     console.error('加载收藏失败:', error)
     ElMessage.error('加载收藏失败')

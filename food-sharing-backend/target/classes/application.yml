@@ -20,3 +20,7 @@ app:
   jwt:
     secret: "change_this_secret_to_a_long_random_string_please"
     expire-minutes: 120
+
+backup:
+  enabled: true
+  directory: backups

@@ -201,7 +201,8 @@ const uploadFiles = async () => {
       const imageFiles = imageList.value.map(item => item.raw).filter(Boolean)
       if (imageFiles.length > 0) {
         const response = await uploadImages(imageFiles)
-        imageUrl = response.data.urls[0] // 取第一张作为主图
+        // axios拦截器已经返回了response.data，所以直接使用response
+        imageUrl = response?.urls?.[0] || '' // 取第一张作为主图
       }
     } catch (error) {
       throw new Error('图片上传失败: ' + error.message)
@@ -212,7 +213,8 @@ const uploadFiles = async () => {
   if (videoList.value.length > 0 && videoList.value[0].raw) {
     try {
       const response = await uploadVideo(videoList.value[0].raw)
-      videoUrl = response.data.url
+      // axios拦截器已经返回了response.data，所以直接使用response
+      videoUrl = response?.url || ''
     } catch (error) {
       throw new Error('视频上传失败: ' + error.message)
     }

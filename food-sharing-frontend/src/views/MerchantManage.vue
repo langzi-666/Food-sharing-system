@@ -223,7 +223,8 @@ const handleLogoChange = async (file) => {
   if (!file.raw) return
   try {
     const response = await uploadImage(file.raw)
-    form.logo = response.data.url
+    // axios拦截器已经返回了response.data，所以直接使用response
+    form.logo = response?.url || ''
     ElMessage.success('Logo上传成功')
   } catch (error) {
     ElMessage.error('Logo上传失败')
@@ -234,7 +235,8 @@ const handleCoverChange = async (file) => {
   if (!file.raw) return
   try {
     const response = await uploadImage(file.raw)
-    form.coverImage = response.data.url
+    // axios拦截器已经返回了response.data，所以直接使用response
+    form.coverImage = response?.url || ''
     ElMessage.success('封面上传成功')
   } catch (error) {
     ElMessage.error('封面上传失败')

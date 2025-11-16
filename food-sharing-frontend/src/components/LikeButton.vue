@@ -33,8 +33,9 @@ const loading = ref(false)
 const loadLikeStatus = async () => {
   try {
     const response = await getLikeStatus(props.postId)
-    liked.value = response.data.liked
-    likeCount.value = response.data.likeCount
+    // axios拦截器已经返回了response.data，所以直接使用response
+    liked.value = response?.liked || false
+    likeCount.value = response?.likeCount || 0
   } catch (error) {
     console.error('获取点赞状态失败:', error)
   }
@@ -50,8 +51,9 @@ const handleLike = async () => {
   loading.value = true
   try {
     const response = await toggleLike(props.postId)
-    liked.value = response.data.liked
-    likeCount.value = response.data.likeCount
+    // axios拦截器已经返回了response.data，所以直接使用response
+    liked.value = response?.liked || false
+    likeCount.value = response?.likeCount || 0
     
     ElMessage.success(liked.value ? '点赞成功' : '取消点赞')
   } catch (error) {

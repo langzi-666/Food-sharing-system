@@ -70,9 +70,15 @@ const loadUserInfo = async () => {
   
   try {
     const response = await getUserInfo()
-    userInfo.value = response.data
+    // 适配新的响应格式（可能是data字段，也可能是直接返回对象）
+    userInfo.value = response.data || response
   } catch (error) {
     console.error('获取用户信息失败:', error)
+    // 如果token无效，清除本地存储
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      userInfo.value = {}
+    }
   }
 }
 
@@ -183,17 +189,63 @@ html, body {
   gap: 10px;
 }
 
+/* 响应式设计优化 */
 @media (max-width: 768px) {
   .header-content {
     padding: 0 10px;
+    flex-wrap: wrap;
+  }
+  
+  .logo h2 {
+    font-size: 18px;
   }
   
   .nav-menu {
-    display: none;
+    order: 3;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .nav-menu .el-menu {
+    justify-content: center;
   }
   
   .user-menu {
     min-width: auto;
+  }
+  
+  .auth-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .auth-buttons .el-button {
+    width: 60px;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    height: auto !important;
+    min-height: 60px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    padding: 10px;
+  }
+  
+  .logo {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .user-menu {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
   }
 }
 </style>

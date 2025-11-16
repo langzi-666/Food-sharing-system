@@ -3,6 +3,7 @@ package com.foodsharing.controller;
 import com.foodsharing.annotation.RequiresAdmin;
 import com.foodsharing.entity.*;
 import com.foodsharing.repository.*;
+import com.foodsharing.service.BackupService;
 import com.foodsharing.service.SystemLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
@@ -31,12 +32,13 @@ public class AdminController {
     private final SystemConfigRepository systemConfigRepository;
     private final SystemLogRepository systemLogRepository;
     private final SystemLogService systemLogService;
+    private final BackupService backupService;
 
     public AdminController(UserRepository userRepository, PostRepository postRepository,
                           CommentRepository commentRepository, LikeRepository likeRepository,
                           FavoriteRepository favoriteRepository, MerchantRepository merchantRepository,
                           SystemConfigRepository systemConfigRepository, SystemLogRepository systemLogRepository,
-                          SystemLogService systemLogService) {
+                          SystemLogService systemLogService, BackupService backupService) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
@@ -46,6 +48,7 @@ public class AdminController {
         this.systemConfigRepository = systemConfigRepository;
         this.systemLogRepository = systemLogRepository;
         this.systemLogService = systemLogService;
+        this.backupService = backupService;
     }
 
     // ========== 用户管理 ==========
@@ -317,6 +320,24 @@ public class AdminController {
         result.put("totalPages", logs.getTotalPages());
         result.put("currentPage", page);
         return ResponseEntity.ok(result);
+    }
+
+    // ========== 数据备份管理 ==========
+    @PostMapping("/backup")
+    public ResponseEntity<?> createBackup(@RequestParam(defaultValue = "manual") String type) {
+        backupService.createBackup(type);
+        return ResponseEntity.ok(Map.of("message", "备份任务已启动"));
+    }
+
+    @GetMapping("/backups")
+    public ResponseEntity<?> listBackups() {
+        return ResponseEntity.ok(Map.of("backups", backupService.listBackups()));
+    }
+
+    @PostMapping("/backup/cleanup")
+    public ResponseEntity<?> cleanupBackups(@RequestParam(defaultValue = "10") int keepCount) {
+        backupService.cleanupOldBackups(keepCount);
+        return ResponseEntity.ok(Map.of("message", "清理完成"));
     }
 }
 

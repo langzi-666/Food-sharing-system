@@ -94,8 +94,9 @@ router.beforeEach(async (to, from, next) => {
         // 如果不是管理员，尝试获取最新用户信息
         const { getUserInfo } = await import('@/api/users')
         const response = await getUserInfo()
-        const role = response.data.role
-        localStorage.setItem('userInfo', JSON.stringify(response.data))
+        // axios拦截器已经返回了response.data，所以直接使用response
+        const role = response?.role
+        localStorage.setItem('userInfo', JSON.stringify(response))
         
         if (role !== 'ROLE_ADMIN') {
           next('/')
